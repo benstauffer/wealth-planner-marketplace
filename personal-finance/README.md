@@ -1,4 +1,4 @@
-# Wealth Planner
+# Personal Finance
 
 Client-facing tax analysis and planning for business owners. Upload an IRS transcript for instant situation review, identify optimization opportunities with dollar-quantified savings, run tax estimates with actionable recommendations, compare entity structures with implementation roadmaps, and build multi-year projections with year-by-year action plans.
 
@@ -6,10 +6,10 @@ Client-facing tax analysis and planning for business owners. Upload an IRS trans
 
 | Command | What it does |
 |---------|-------------|
-| `/wealth-planner:tax-review` | Upload an IRS transcript → get a full situation summary, opportunity analysis, and prioritized action plan |
-| `/wealth-planner:estimate` | Calculate a full tax liability estimate with actionable recommendations — what to change and how much it saves |
-| `/wealth-planner:entity-compare` | S-Corp vs Schedule C comparison with breakeven analysis and step-by-step implementation roadmap |
-| `/wealth-planner:projection` | 5-year income, tax, and net worth projection with year-by-year action items at every threshold crossing |
+| `/personal-finance:tax-review` | Upload an IRS transcript → get a full situation summary, opportunity analysis, and prioritized action plan |
+| `/personal-finance:estimate` | Calculate a full tax liability estimate with actionable recommendations — what to change and how much it saves |
+| `/personal-finance:entity-compare` | S-Corp vs Schedule C comparison with breakeven analysis and step-by-step implementation roadmap |
+| `/personal-finance:projection` | 5-year income, tax, and net worth projection with year-by-year action items at every threshold crossing |
 
 ## Workflow
 
@@ -33,7 +33,7 @@ The Tax Review skill automatically pre-populates data for the other skills — n
 
 Every command produces both:
 1. **Chat output** — Formatted tables, analysis, and actionable recommendations directly in the conversation
-2. **Excel workbook** — Multi-tab spreadsheet saved to your outputs folder
+2. **Excel workbook** — Multi-tab spreadsheet saved to your outputs folder (generated via Python/openpyxl)
 
 ## Tax Data
 
@@ -51,10 +51,10 @@ All skills reference comprehensive 2026 tax parameters including:
 ## Usage Examples
 
 ```
-/wealth-planner:tax-review            (then upload IRS transcript PDF)
-/wealth-planner:estimate 300000 mfj california
-/wealth-planner:entity-compare 200000 texas
-/wealth-planner:projection 250000 5
+/personal-finance:tax-review            (then upload IRS transcript PDF)
+/personal-finance:estimate 300000 mfj california
+/personal-finance:entity-compare 200000 texas
+/personal-finance:projection 250000 5
 ```
 
 Or just run the command and answer the prompts for the inputs you want to provide.

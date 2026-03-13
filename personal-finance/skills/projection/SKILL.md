@@ -132,7 +132,7 @@ Create an Excel workbook with tabs:
 6. **Assumptions** — all inputs, growth rates, and parameters
 7. **Threshold Map** — shows each threshold and which year it's crossed
 
-Use the xlsx skill. Apply conditional formatting to highlight threshold crossings. Include simple charts for income growth, tax burden, and net worth trajectory.
+Generate the workbook using a Python script via Bash (openpyxl). Apply conditional formatting to highlight threshold crossings. Include simple charts for income growth, tax burden, and net worth trajectory.
 
 ## Reference Data
 

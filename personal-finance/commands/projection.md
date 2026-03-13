@@ -10,6 +10,6 @@ If $ARGUMENTS is provided, parse it for starting income and projection horizon (
 
 Load the projection skill and follow its full workflow. Default to 5 years if not specified. Always produce:
 1. A formatted chat summary with year-by-year tables and threshold alerts
-2. An Excel workbook saved to the outputs folder using the xlsx skill
+2. An Excel workbook saved to the outputs folder (generated via Python/openpyxl using Bash)
 
 Read references/tax-parameters.md for all 2026 tax data and references/projection-methodology.md for projection defaults.

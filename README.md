@@ -1,4 +1,4 @@
-# stauffer-tax-tools — Claude Code Plugin Marketplace
+# Personal Finance Plugin — Claude Code Plugin Marketplace
 
 Tax analysis and wealth planning plugins for solopreneurs and business owners.
 
@@ -6,12 +6,12 @@ Tax analysis and wealth planning plugins for solopreneurs and business owners.
 
 ```bash
 /plugin marketplace add benstauffer/wealth-planner-marketplace
-/plugin install wealth-planner@stauffer-tax-tools
+/plugin install personal-finance
 ```
 
 ## Plugins
 
-### wealth-planner (v0.2.0)
+### personal-finance (v0.2.0)
 
 Client-facing tax analysis and planning for business owners:
 

@@ -136,7 +136,7 @@ Create an Excel workbook with tabs:
 5. **State Tax** — state bracket calculation
 6. **Assumptions** — all inputs and parameters used
 
-Use the xlsx skill to generate the workbook. Apply currency formatting, bold headers, and highlight the total row.
+Generate the workbook using a Python script via Bash (openpyxl). Apply currency formatting, bold headers, and highlight the total row.
 
 ## Reference Data
 

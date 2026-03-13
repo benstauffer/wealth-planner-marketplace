@@ -1,9 +1,6 @@
 {
-  "name": "wealth-planner",
+  "name": "personal-finance",
   "version": "0.2.0",
   "description": "Client-facing tax analysis and planning for business owners. Upload an IRS transcript for instant situation review and optimization opportunities, run tax estimates with actionable recommendations, compare S-Corp vs Schedule C with implementation roadmaps, and build 5-year projections with year-by-year action plans.",
-  "author": {
-    "name": "Ben Stauffer"
-  },
-  "keywords": ["tax", "solopreneur", "irs-transcript", "tax-review", "projections", "s-corp", "wealth", "business-owner", "tax-planning", "actionable"]
+  "keywords": ["tax", "solopreneur", "irs-transcript", "tax-review", "projections", "s-corp", "personal-finance", "business-owner", "tax-planning", "actionable"]
 }

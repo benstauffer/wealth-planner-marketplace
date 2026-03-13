@@ -1,16 +1,12 @@
 {
-  "name": "stauffer-tax-tools",
+  "name": "personal-finance",
   "description": "Tax analysis and wealth planning tools for solopreneurs and business owners.",
-  "owner": {
-    "name": "Ben Stauffer",
-    "github": "benstauffer"
-  },
   "plugins": [
     {
-      "name": "wealth-planner",
+      "name": "personal-finance",
       "description": "Client-facing tax analysis and planning for business owners. Upload an IRS transcript for instant situation review and optimization opportunities, run tax estimates with actionable recommendations, compare S-Corp vs Schedule C with implementation roadmaps, and build 5-year projections with year-by-year action plans.",
       "version": "0.2.0",
-      "source": "./wealth-planner"
+      "source": "./personal-finance"
     }
   ]
 }

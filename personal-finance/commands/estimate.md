@@ -10,6 +10,6 @@ If $ARGUMENTS is provided, parse it for income amount, filing status, and state.
 
 Load the estimate skill and follow its full calculation workflow. Always produce:
 1. A formatted chat summary with the tax breakdown table
-2. An Excel workbook saved to the outputs folder using the xlsx skill
+2. An Excel workbook saved to the outputs folder (generated via Python/openpyxl using Bash)
 
 Read references/tax-parameters.md in the estimate skill for all 2026 tax data. Do not guess any numbers.

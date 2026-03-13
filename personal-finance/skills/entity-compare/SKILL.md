@@ -169,7 +169,7 @@ Create an Excel workbook with tabs:
 6. **Reasonable Comp** — salary analysis with IRS factors
 7. **Assumptions** — all inputs and parameters
 
-Use the xlsx skill. Highlight the winning entity in green. Include a breakeven chart.
+Generate the workbook using a Python script via Bash (openpyxl). Highlight the winning entity in green. Include a breakeven chart.
 
 ## State-Specific Considerations
 
