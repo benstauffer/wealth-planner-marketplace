@@ -10,4 +10,4 @@ If $ARGUMENTS is provided, parse it for income amount, filing status, and state.
 
 Load the estimate skill and follow its full calculation workflow. Output a formatted chat summary with the full tax breakdown table and recommendations.
 
-Read references/tax-parameters.md in the estimate skill for all 2026 tax data. Do not guess any numbers.
+Read references/tax-parameters.md in the plugin root for all 2026 tax data. Do not guess any numbers.

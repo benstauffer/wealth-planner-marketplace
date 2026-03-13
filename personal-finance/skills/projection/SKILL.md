@@ -125,7 +125,7 @@ Flag when income crosses critical thresholds:
 
 ## Reference Data
 
-Tax parameters are in `references/tax-parameters.md`. Projection methodology details are in `references/projection-methodology.md`.
+Tax parameters are in `../../references/tax-parameters.md` (shared plugin reference). Projection methodology details are in `references/projection-methodology.md`.
 
 ## Step 7: Inflection Point Actions
 

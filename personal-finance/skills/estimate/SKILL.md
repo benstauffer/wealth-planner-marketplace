@@ -130,7 +130,7 @@ Present a summary table:
 
 ## Reference Data
 
-All 2026 tax parameters (federal brackets, state brackets, SE rates, QBID thresholds, retirement limits, SALT caps, NIIT thresholds) are in `references/tax-parameters.md`.
+All 2026 tax parameters (federal brackets, state brackets, SE rates, QBID thresholds, retirement limits, SALT caps, NIIT thresholds) are in `../../references/tax-parameters.md` (shared plugin reference).
 
 Read that file for any specific number. Do not guess or use outdated figures.
 

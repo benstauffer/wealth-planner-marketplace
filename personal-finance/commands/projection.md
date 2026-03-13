@@ -10,4 +10,4 @@ If $ARGUMENTS is provided, parse it for starting income and projection horizon (
 
 Load the projection skill and follow its full workflow. Default to 5 years if not specified. Output year-by-year tables, threshold alerts, and year-by-year action items directly in chat.
 
-Read references/tax-parameters.md for all 2026 tax data and references/projection-methodology.md for projection defaults.
+Read references/tax-parameters.md in the plugin root for all 2026 tax data and skills/projection/references/projection-methodology.md for projection defaults.

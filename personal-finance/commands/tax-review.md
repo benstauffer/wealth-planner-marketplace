@@ -15,4 +15,4 @@ Load the tax-review skill and follow its full workflow:
 4. Deliver the prioritized action plan
 5. Offer to run follow-up scenarios (estimate, entity-compare, projection) with the extracted data
 
-Always read references/tax-parameters.md for current-year tax data when calculating savings opportunities. Do not guess any numbers.
+Always read references/tax-parameters.md in the plugin root for current-year tax data when calculating savings opportunities. Do not guess any numbers.

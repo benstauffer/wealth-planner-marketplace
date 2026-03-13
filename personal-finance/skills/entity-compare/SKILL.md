@@ -171,7 +171,7 @@ Flag these state issues:
 
 ## Reference Data
 
-Tax parameters in `references/tax-parameters.md`. Entity comparison details in `references/entity-comparison.md`.
+Tax parameters in `../../references/tax-parameters.md` (shared plugin reference). Entity comparison details in `references/entity-comparison.md`.
 
 ## Implementation Roadmap
 

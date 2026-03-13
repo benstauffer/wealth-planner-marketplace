@@ -10,4 +10,4 @@ If $ARGUMENTS is provided, parse it for income amount and state. Ask for any mis
 
 Load the entity-compare skill and follow its full comparison workflow. Output the comparison table, breakeven analysis, and recommendation directly in chat.
 
-Read references/tax-parameters.md for tax data and references/entity-comparison.md for entity-specific rules and costs.
+Read references/tax-parameters.md in the plugin root for tax data and skills/entity-compare/references/entity-comparison.md for entity-specific rules and costs.
