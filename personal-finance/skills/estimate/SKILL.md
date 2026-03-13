@@ -6,209 +6,333 @@ description: >
   "run a tax estimate", "how much in taxes", "tax bill", or provides business income and
   wants to know their total tax burden including self-employment tax, income tax, QBID, NIIT,
   and state taxes.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Tax Estimate for Business Owners
 
-Produce a comprehensive tax liability estimate. Output all results as formatted tables and analysis directly in chat.
+Produce a comprehensive tax liability estimate. Output all results as formatted tables with
+every intermediate calculation shown — no skipping steps.
 
 ## Required Inputs
 
-Gather from the user (ask if not provided):
+Gather ALL of the following before calculating. Ask for any missing items — do not assume or skip.
 
+### Identity & Structure
 - **Filing status**: single, mfj, mfs, hoh
+- **Age** (owner's age — determines retirement catch-up eligibility at 50+, 60-63 super catch-up, HSA catch-up at 55+)
 - **Entity type**: Schedule C (sole prop / SMLLC) or S-Corp
-- **Net business income** (profit after ordinary business expenses)
 - **State of residence**
-- **W-2 wages paid** (S-Corp only — if not provided, calculate reasonable comp)
 - **Filing year**: default 2026
-- **Other income** (if any): W-2 from employer, investment income, rental income
-- **Retirement contributions**: Solo 401(k), SEP-IRA, traditional IRA, HSA
-- **Itemized deductions** (if applicable): mortgage interest, state/local taxes, charitable
+- **Business type**: SSTB or non-SSTB (ask: "Is your business in consulting, law, health, finance, or other professional services?" — affects QBI deduction above threshold)
+
+### Income
+- **Net business income** (profit after ordinary business expenses, before owner compensation)
+- **W-2 wages paid to yourself** (S-Corp only — if not yet set, calculate reasonable comp below)
+- **W-2 wages from an employer** (if any — separate from S-Corp self-wages)
+- **Short-term capital gains** (held ≤ 1 year — taxed as ordinary income)
+- **Long-term capital gains** (held > 1 year — preferential rates)
+- **Qualified dividends** (taxed at LTCG rates)
+- **Ordinary dividends** (taxed as ordinary income)
+- **Interest income** (taxed as ordinary income)
+- **Rental income, net of expenses** (if any)
+- **Other income** (1099-NEC side work, alimony received pre-2019, etc.)
+
+### Deductions & Adjustments
+- **Retirement contributions**: specify type and amount (Solo 401(k) employee deferral, employer contribution, SEP-IRA, traditional IRA, Roth IRA — Roth does NOT reduce taxable income)
+- **Self-employed health insurance premiums** (monthly premium × 12 if paying out of pocket or through S-Corp)
+- **HSA contributions**: amount contributed + coverage type (self-only or family HDHP)
+- **Itemized deductions** (if potentially above standard): mortgage interest, state/local taxes paid, charitable contributions, medical expenses above 7.5% AGI
+
+### Payments Already Made
+- **Estimated tax payments** made so far this year (for balance due calculation)
+- **W-2 withholding** from any employer wages (for balance due calculation)
+- **Prior year total federal tax** (for safe harbor estimated payment calculation — 110% if AGI > $150K)
+
+---
 
 ## Calculation Order
 
-Tax calculations have circular dependencies. Follow this exact sequence:
+Tax calculations have circular dependencies. Follow this exact sequence and show every intermediate value.
 
-### Step 1: Self-Employment Tax (Schedule C only)
+### Step 1A: Self-Employment Tax (Schedule C only)
 ```
-SE income = net profit × 92.35%
-SS tax = min(SE income, $184,500) × 12.4%
-Medicare tax = SE income × 2.9%
-Additional Medicare = max(0, SE income - threshold) × 0.9%
-Total SE tax = SS tax + Medicare tax + Additional Medicare
-SE deduction = (SS tax + Medicare tax) / 2   ← Additional Medicare NOT deductible
-```
-
-Thresholds: $200,000 single / $250,000 MFJ
-
-### Step 1 (S-Corp variant): Payroll Tax
-```
-Employer SS = min(wages, $184,500) × 6.2%
-Employer Medicare = wages × 1.45%
-Employee SS = min(wages, $184,500) × 6.2%
-Employee Medicare = wages × 1.45%
-Additional Medicare = max(0, wages - threshold) × 0.9%
+SE income         = net profit × 92.35%
+SS tax            = min(SE income, $184,500) × 12.4%
+Medicare tax      = SE income × 2.9%
+Additional Med    = max(0, SE income − threshold) × 0.9%
+                    [threshold: $200,000 single / $250,000 MFJ]
+Total SE tax      = SS tax + Medicare tax + Additional Medicare
+SE deduction      = (SS tax + Medicare tax) / 2
+                    ← Additional Medicare is NOT deductible
 ```
 
-### Step 2: Adjusted Gross Income
+### Step 1B: Payroll Tax (S-Corp only)
 ```
-Gross income = business income + other income
+Employer SS       = min(W-2 wages, $184,500) × 6.2%
+Employer Medicare = W-2 wages × 1.45%
+Employer total    = Employer SS + Employer Medicare
+
+Employee SS       = min(W-2 wages, $184,500) × 6.2%
+Employee Medicare = W-2 wages × 1.45%
+Additional Med    = max(0, W-2 wages − threshold) × 0.9%
+Employee total    = Employee SS + Employee Medicare + Additional Med
+
+S-Corp distribution = net profit − W-2 wages − Employer total
+```
+
+**S-Corp health insurance note:** If the S-Corp pays owner health insurance premiums,
+those premiums are added to W-2 Box 1 (income tax wages) but NOT Box 3/5 (FICA wages).
+This means: income tax is calculated on wages + premiums, but payroll tax is only on wages.
+The owner then deducts the premiums above-the-line as self-employed health insurance.
+Net effect on income tax = zero, but correct treatment matters for the payroll tax savings calculation.
+
+### Step 2: Gross Income
+```
+Schedule C:
+  Gross income = net profit + employer W-2 wages + STCG + LTCG + QD
+                 + ordinary dividends + interest + rental income + other
+
+S-Corp:
+  Gross income = W-2 wages + health insurance premiums (if in W-2 box 1)
+                 + distribution + employer W-2 wages (if any)
+                 + STCG + LTCG + QD + ordinary dividends + interest
+                 + rental income + other
+```
+
+### Step 3: Adjusted Gross Income
+```
 Above-the-line deductions:
-  - SE tax deduction (Step 1, Schedule C only)
-  - Retirement contributions (Solo 401(k), SEP, IRA)
-  - HSA contributions
-  - Self-employed health insurance
-AGI = Gross income - above-the-line deductions
+  Schedule C:   SE deduction (Step 1A)
+  S-Corp:       (no SE deduction)
+  Both:         Solo 401(k) / SEP-IRA / traditional IRA deduction
+                Self-employed health insurance premiums
+                HSA contributions (within annual limit)
+
+AGI = Gross income − above-the-line deductions
 ```
 
-For S-Corp: business income = distributions (profit minus wages minus employer payroll tax)
-W-2 wages also included in gross income.
+HSA limits (2026): $4,400 self-only / $8,750 family / +$1,000 catch-up age 55+
+IRA deduction phases out for active plan participants — check phase-out range in tax-parameters.md.
 
-### Step 3: QBI Deduction (Section 199A)
+### Step 4: Capital Gains Classification
 ```
-QBI = net business income - reasonable comp (S-Corp) OR net profit - SE deduction (Sched C)
+Ordinary income  = AGI − LTCG − QD  (i.e., AGI minus preferential-rate income)
 
-If taxable income < $201,750 (single) / $403,500 (MFJ):
-  QBID = 20% × QBI (full deduction)
+LTCG + QD are taxed at preferential rates — do NOT apply regular brackets to them.
+They stack on TOP of ordinary income for rate determination:
 
-If above threshold, apply limitations:
-  - W-2 wage limit: greater of (50% × W-2 wages) or (25% × W-2 + 2.5% × UBIA)
-  - SSTB phase-out if applicable
-  - Phase-out range: $75,000 single / $150,000 MFJ (OBBBA expanded)
+  0% rate applies to LTCG/QD up to: [0% threshold from tax-parameters.md] − ordinary_taxable_income
+  15% rate applies to LTCG/QD above 0% zone, up to: [15% threshold from tax-parameters.md]
+  20% rate applies to LTCG/QD above the 15% threshold
 
-QBID cap = min(20% × QBI, W-2 wage limit if applicable)
-Final QBID = min(QBID cap, 20% × taxable income before QBID)
+STCG is ordinary income — included in brackets, not separated here.
 ```
 
-### Step 4: Taxable Income & Federal Tax
+Always show the split: how much LTCG/QD falls in each rate bucket.
+
+### Step 5: QBI Deduction (Section 199A)
 ```
-Deduction = max(standard deduction, itemized deductions)
-  Standard: $16,100 single / $32,200 MFJ
-Taxable income = AGI - deduction - QBID
-Federal income tax = apply 2026 brackets to taxable income
+QBI base:
+  Schedule C:  net profit − SE deduction
+  S-Corp:      net profit − W-2 wages − employer payroll tax
+
+Threshold check (use taxable income BEFORE QBI deduction):
+  Tentative taxable income = AGI − max(standard, itemized)
+
+If tentative taxable income ≤ $201,750 single / $403,500 MFJ:
+  QBID = min(20% × QBI, 20% × tentative taxable income)   [full deduction]
+
+If above threshold, enter phase-out range ($75,000 single / $150,000 MFJ wide):
+  Apply W-2 wage limitation: greater of (50% × W-2) or (25% × W-2 + 2.5% × UBIA)
+    UBIA = unadjusted basis of qualified property — default 0 for service businesses
+  If SSTB: phase-out reduces QBI and W-2 limit proportionally; zero above phase-out top
+  QBID = min(20% × QBI, W-2 wage limit) × phase-out percentage
+  Final QBID = min(result, 20% × tentative taxable income)
 ```
 
-### Step 5: NIIT (Net Investment Income Tax)
+**State QBID conformity:** Several states do NOT allow the federal QBI deduction on the state return.
+Flag this for the user:
+- California: no QBID — compute state tax WITHOUT the deduction
+- Massachusetts: no QBID
+- Connecticut: no QBID
+- All other states: check tax-parameters.md for conformity status
+
+### Step 6: Taxable Income & Federal Tax
 ```
-If MAGI > $200,000 (single) / $250,000 (MFJ):
-  NIIT = 3.8% × min(net investment income, MAGI - threshold)
+Itemized deductions note: SALT cap = $40,400 (phases out MAGI > $505,000)
+Deduction         = max(standard deduction, itemized)
+  Standard 2026:  $16,100 single / $32,200 MFJ
+
+Ordinary taxable income = AGI − deduction − QBID − LTCG − QD
+  [back out LTCG/QD so regular brackets apply only to ordinary income]
+
+Federal income tax on ordinary income = apply 2026 brackets to ordinary taxable income
+Federal tax on LTCG/QD               = apply preferential rates from Step 4
+Total federal income tax              = ordinary tax + LTCG/QD tax
 ```
 
-### Step 6: State Income Tax
-Load state brackets and rules from reference data. Account for:
-- State standard deduction or itemized
-- PTET election if applicable (and SALT cap implications)
-- State-specific entity taxes (e.g., CA $800 LLC fee, CA S-Corp 1.5%)
-- Local taxes (NYC, Philadelphia, etc.)
+### Step 7: NIIT (Net Investment Income Tax)
+```
+If MAGI > $200,000 single / $250,000 MFJ:
+  NII = LTCG + QD + ordinary dividends + interest + net rental income
+  NIIT = 3.8% × min(NII, MAGI − threshold)
+```
 
-### Step 7: Total Tax Summary
+### Step 8: State Income Tax
+Load state brackets and rules from tax-parameters.md. Account for:
+- State standard deduction (many states differ from federal)
+- QBID conformity (Step 5 — do not apply if state doesn't conform)
+- PTET election if applicable (deducted at entity level, reduces federal SALT exposure)
+- State-specific entity taxes: CA $800 min franchise + 1.5% S-Corp net income; NY filing fees; etc.
+- Local taxes: NYC 3.876% UBT on Schedule C, Philadelphia BIRT, etc.
+- State capital gains rates (most states tax LTCG as ordinary income — no preferential rate)
+
+### Step 9: Total Tax Summary
+
+---
 
 ## Output Format
 
-### Chat Output
-Present a summary table:
+First show the calculation trace — every step labeled with its intermediate values.
+Then present the summary table.
+
+### Calculation Trace (required — show before summary table)
+
+```
+STEP 1: [SE Tax or Payroll Tax]
+  [Show each line of the formula with actual numbers]
+
+STEP 2-3: Gross Income → AGI
+  [Show each income item added, each deduction subtracted]
+
+STEP 4: Capital Gains Split
+  [Show LTCG/QD rate buckets with amounts]
+
+STEP 5: QBI
+  [Show QBI base, threshold check, any wage limitation applied]
+
+STEP 6: Taxable Income
+  [Show deduction used, ordinary taxable income, LTCG/QD separation]
+
+STEP 7-8: NIIT + State
+  [Show NIIT calc if applicable; state brackets applied]
+```
+
+### Summary Table
 
 | Category | Amount |
 |----------|--------|
 | Gross Business Income | |
-| SE Tax Deduction / Payroll Tax | |
+| W-2 Wages (S-Corp) / SE Tax Deduction (Sched C) | |
+| Other Income (W-2, interest, dividends, STCG) | |
+| Long-Term Capital Gains + Qualified Dividends | |
 | Retirement Contributions | |
-| AGI | |
+| Health Insurance Deduction | |
+| HSA Deduction | |
+| **AGI** | |
+| Standard / Itemized Deduction | |
 | QBI Deduction | |
-| Taxable Income | |
-| Federal Income Tax | |
-| SE Tax / Payroll Tax (employee share) | |
+| **Ordinary Taxable Income** | |
+| Federal Tax (ordinary brackets) | |
+| Federal Tax (LTCG/QD preferential rates) | |
+| SE Tax / Payroll Tax (total) | |
 | NIIT | |
 | State Income Tax | |
-| Local Tax | |
+| State Entity Tax / Local Tax | |
 | **Total Tax Liability** | |
+| Withholding + Estimated Payments | |
+| **Balance Due / (Refund)** | |
 | **Effective Tax Rate** | |
-| **Marginal Tax Rate** | |
+| **Marginal Ordinary Rate** | |
+| **Marginal LTCG Rate** | |
 
+---
 
 ## Reference Data
 
-All 2026 tax parameters (federal brackets, state brackets, SE rates, QBID thresholds, retirement limits, SALT caps, NIIT thresholds) are in `../../references/tax-parameters.md` (shared plugin reference).
+All 2026 tax parameters (federal brackets, LTCG rate thresholds, state brackets, SE rates,
+QBID thresholds, retirement limits, HSA limits, SALT caps, NIIT thresholds, state QBID
+conformity) are in `../../references/tax-parameters.md`.
 
-Read that file for any specific number. Do not guess or use outdated figures.
+Read that file for every specific number. Do not guess or use figures from memory.
 
-## Step 8: Actionable Recommendations
+---
 
-After presenting the tax summary, ALWAYS include a recommendations section. Analyze the estimate results and generate specific, dollar-quantified actions the client can take.
+## Step 10: Actionable Recommendations
 
-### What to Check
+After the summary table, ALWAYS include a recommendations section with specific dollar-quantified actions.
 
-**Retirement Contribution Optimization:**
-- Are they maximizing retirement contributions? If not, calculate the tax savings from contributing more.
-- Show the specific dollar amount: "Contributing an additional $X to your Solo 401(k) would reduce your tax bill by $Y"
-- If they said "maximize": confirm the max was applied and show the tax savings vs. contributing nothing
+**Retirement Optimization:**
+- Are they at the contribution max? Show tax savings from contributing more.
+- Age 50+: flag catch-up eligibility ($8,000 extra employee deferral)
+- Age 60-63: flag super catch-up ($11,250 extra under SECURE 2.0)
+- S-Corp: employer contribution limit is 25% of W-2 wages — show if there's room
+
+**Capital Gains Strategy:**
+- If significant STCG: "Holding until 1-year mark would change the rate from [X]% to [Y]%, saving $Z"
+- If LTCG is pushing into 20% territory: flag tax-loss harvesting, installment sale options
+- If LTCG/QD is in the 0% bucket: flag opportunity to realize more gains tax-free
 
 **Bracket Management:**
-- What bracket are they in? How far are they from the next bracket boundary?
-- "You're $X away from the [next]% bracket. An additional $X in deductions would keep you in the [current]% bracket, saving $Y."
-
-**QBI Threshold Proximity:**
-- If income is within $30K of the QBI phase-out threshold: flag it with specific guidance
-- "Your taxable income is $X below the QBI phase-out. If income increases by more than $X, you'll begin losing the $Y QBI deduction."
-- If above threshold: "You've exceeded the QBI phase-out. To recover the deduction, you'd need to reduce taxable income by $X through [specific strategies]."
+- How far from the next bracket boundary?
+- How far from the QBI phase-out threshold?
+- Additional deductions (retirement, HSA) that would pull income below a boundary
 
 **NIIT Exposure:**
-- If MAGI is near or above $200K/$250K: quantify NIIT exposure
-- "Your investment income of $X is subject to $Y in NIIT. Strategies to consider: [tax-loss harvesting, shifting to tax-exempt bonds, etc.]"
+- Quantify if MAGI is near or above threshold
+- Strategies: Roth conversion timing, tax-exempt bonds, harvesting losses
 
-**Estimated Payment Schedule:**
-- Calculate required quarterly estimated payments for the current year
-- Base it on 110% safe harbor if AGI > $150K
-- Provide the four quarterly amounts and due dates (April 15, June 15, Sept 15, Jan 15)
-- If they were penalized last year: "To avoid the $X penalty you paid last year, make quarterly payments of $Y."
+**HSA:**
+- If HDHP and not maxed: show full triple-tax benefit in dollars
 
-**HSA Opportunity:**
-- If they have an HDHP but aren't maximizing HSA: quantify the triple tax benefit
-- "You have $X of unused HSA contribution room. Contributing the full amount saves $Y in taxes this year, plus grows tax-free."
+**Estimated Payments:**
+- Safe harbor: 100% of prior year tax (110% if prior AGI > $150K)
+- Calculate quarterly amounts and due dates: Apr 15 / Jun 15 / Sep 15 / Jan 15
+- Show balance due if payments already made
 
-### Chat Output — Recommendations
-
-After the summary table, add:
-
-**What You Can Do:**
+### Recommendations Table
 
 | Action | Tax Savings | Deadline |
 |--------|-------------|----------|
-| [Specific action 1] | $X,XXX | [Date] |
-| [Specific action 2] | $X,XXX | [Date] |
-| [Specific action 3] | $X,XXX | [Date] |
+| [Specific action] | $X,XXX | [Date] |
 
-Then 1-2 sentences on the single highest-impact move.
-
+---
 
 ## Transcript Input Support
 
-If the user provides data extracted from an IRS transcript (via the tax-review skill), accept all pre-populated fields without re-asking. The transcript data format is:
+If the user provides data from a tax-review transcript extraction, accept all pre-populated
+fields without re-asking. Ask only:
+- "Has anything changed from last year?"
+- "What income should I assume for this year?"
 
+Transcript format:
 ```
 Extracted from [YEAR] IRS Transcript:
 - Filing status: [status]
 - W-2 wages: $[amount]
 - Business income: $[amount]
-- Capital gains: $[amount]
-- Investment income: $[amount]
+- Short-term capital gains: $[amount]
+- Long-term capital gains: $[amount]
+- Qualified dividends: $[amount]
+- Ordinary dividends + interest: $[amount]
 - State: [state]
 - AGI: $[amount]
-- Current retirement contributions: $[amount]
+- Retirement contributions: $[amount]
 - HSA contributions: $[amount]
+- Health insurance premiums: $[amount]
 - Entity type: [type]
+- Prior year total tax: $[amount]
 ```
 
-When receiving transcript data, use the prior year as baseline and model the CURRENT year estimate, asking only:
-- "Has anything changed from last year?" (income, filing status, state, new business, etc.)
-- "What assumptions should I use for this year's income?" (same, growth %, specific number)
+---
 
 ## Important Notes
 
-- Always show the SE tax deduction calculation explicitly — the additional Medicare tax (0.9%) is NOT included in the deductible portion
-- For S-Corp, validate reasonable compensation against IRS factors before calculating
-- SALT cap for 2026 is $40,400 (phases out for MAGI > $505,000)
-- QBI phase-out ranges were expanded by OBBBA to $75K/$150K
+- Additional Medicare (0.9%) is NOT deductible — only the base SE tax halves are
+- For S-Corp, validate reasonable comp before calculating — it's the #1 audit trigger
+- SALT cap 2026: $40,400 (phases out MAGI > $505,000)
+- QBI phase-out range expanded by OBBBA: $75K wide (single) / $150K wide (MFJ)
+- QBI deduction is now permanent under OBBBA
+- State capital gains: most states tax at ordinary rates — do not apply federal preferential rates to state calc unless state-specific rules say otherwise
 - Always caveat: "This is an estimate for planning purposes. Consult a CPA for filing."

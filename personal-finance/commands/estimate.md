@@ -1,7 +1,7 @@
 ---
 description: Calculate tax liability estimate for a business owner
 allowed-tools: Read, Write, Bash, Edit, Glob, Grep
-argument-hint: [income] [filing-status] [state]
+argument-hint: [income] [filing-status] [state] [entity-type] [age]
 ---
 
 Run a comprehensive tax liability estimate for a business owner using the estimate skill.
