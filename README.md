@@ -5,7 +5,7 @@ Tax analysis and wealth planning plugins for solopreneurs and business owners.
 ## Install
 
 ```bash
-/plugin marketplace add benstauffer/wealth-planner-marketplace
+/plugin marketplace add benstauffer/personal-finance-marketplace
 /plugin install personal-finance
 ```
 
